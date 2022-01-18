@@ -9,7 +9,19 @@
 
 #include "mm_systime.h"
 
+#include <sstream>
+#include <iomanip>
+
 using namespace std;
+
+std::string arond_st (double x, int n)
+{
+    std::string Result;  //String which will contain the result
+    std::ostringstream convert; //Stream used for the conversion
+    convert << std::fixed << std::setprecision(n) << x;  //Insert the textual representation
+    Result = convert.str();  //Set 'Result' to the contents of the stream
+    return Result;
+}
 
 int main(int argc, char *argv[])
 {
@@ -215,7 +227,7 @@ int main(int argc, char *argv[])
     int n = 50;
 
     //Test 10 different array sizes
-    for(int i = 1; i <= 10; i++)
+    for(int i = 11; i <= 20; i++)
     {
         //Create array to be saved
         double arrSave[num*i];
@@ -248,18 +260,80 @@ int main(int argc, char *argv[])
 
         //Measure time of binary data
         //Average over n iterations
-        int t1 = mm_systime();  //Calling the function returns the time in milliseconds
+        t1 = mm_systime();  //Calling the function returns the time in milliseconds
         for(int s = 0; s < n; s++)
         {
             //Write a binary file
-            filename = ref + to_string(num*i) + "text.txt";
+            filename = ref + to_string(num*i) + "binary.data";
             const char* nameout = filename.c_str();
             ofstream out(nameout, std::ios::out | std::ios::binary);
             out.write((char *) arrSave, (i*num)*sizeof(int));
             out.close();
         }
-        int t2 = mm_systime(); //Get time in milliseconds
+        t2 = mm_systime(); //Get time in milliseconds
         //Print measured time per iteration
         cout << "Execution time (binary file): " << (double(t2 - t1) / 1000.) / n << " seconds" << endl;
     }
+
+    //The resulting times are as follows:
+        // Time execution of saving methods
+
+        // Execution times for size 3465
+        // Execution time (text file): 0.03552 seconds
+        // Execution time (binary file): 0.00092 seconds
+
+        // Execution times for size 3780
+        // Execution time (text file): 0.03758 seconds
+        // Execution time (binary file): 0.00084 seconds
+
+        // Execution times for size 4095
+        // Execution time (text file): 0.0431 seconds
+        // Execution time (binary file): 0.00086 seconds
+
+        // Execution times for size 4410
+        // Execution time (text file): 0.04286 seconds
+        // Execution time (binary file): 0.0009 seconds
+
+        // Execution times for size 4725
+        // Execution time (text file): 0.0449 seconds
+        // Execution time (binary file): 0.0009 seconds
+
+        // Execution times for size 5040
+        // Execution time (text file): 0.0497 seconds
+        // Execution time (binary file): 0.00084 seconds
+
+        // Execution times for size 5355
+        // Execution time (text file): 0.05472 seconds
+        // Execution time (binary file): 0.0009 seconds
+
+        // Execution times for size 5670
+        // Execution time (text file): 0.05978 seconds
+        // Execution time (binary file): 0.001 seconds
+
+        // Execution times for size 5985
+        // Execution time (text file): 0.06236 seconds
+        // Execution time (binary file): 0.00164 seconds
+
+        // Execution times for size 6300
+        // Execution time (text file): 0.06116 seconds
+        // Execution time (binary file): 0.00102 seconds
+
+    //It can be seen that saving in the binary file is much more efficient
+    //For the sizes of the array chosen, the binary file was around two order of magnitude faster
+
+    //In terms of storage size we analyzed the largest files, with size of 6300
+    //The text file has a size of 32 KB
+    //The binary file has a size of 28 KB
+
+
+
+    //Using the arond_st() function
+    double test = 234.2542509;
+    cout << test << endl;  //Prints 234.254
+    cout << arond_st(test, 2) << endl;  //Prints 234.25
+    cout << arond_st(test, 4) << endl;  //Prints 234.2543
+    cout << arond_st(test, 6) << endl;  //Prints 234.254251
+    cout << arond_st(test, 8) << endl;  //Prints 234.25425090
+    cout << arond_st(test, 10) << endl;  //Prints 234.2542509000
+    //As it can be seen, the function allows us to set the number of decimal numbers that we want to be represented in the string
 }
