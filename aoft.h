@@ -1,3 +1,6 @@
+#ifndef AOFT
+#define AOFT
+
 #include <bits/stdc++.h>
 #include <math.h> 
 using namespace std;
@@ -10,3 +13,5 @@ double aoft(double t, double H0, double omegam0)
     a = pow(a, 1./3.);
     return a;
 }
+
+#endif /* AOFT */
