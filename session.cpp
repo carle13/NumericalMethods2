@@ -1,8 +1,13 @@
-#include<string>
-#include<iostream>
-#include<fstream>
-#include<cstring>
-#include<cstdlib>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <cstring>
+#include <cstdlib>
+
+#include <stdlib.h> 
+#include <string>
+
+#include "mm_systime.h"
 
 using namespace std;
 
@@ -143,5 +148,118 @@ int main(int argc, char *argv[])
     //A file is produced, with the text saved in ref + .txt
     //The file contains the values 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 
+
+
+    cout << endl << "Reading a txt file" << endl;
+    //Reading data from the file
+    //Clear the array
+    memset(numbers, 0, 10*sizeof(int));
+    //Print the array
+    //This prints an array full of 0, as the data contained in them was deleted
+    for(int i = 0; i < 10; i++) cout << numbers[i] << endl;
     
+    //Read an ASCII file
+    string line;
+    ifstream myfile_read (filename.c_str());
+    for(int i = 0; i < 10; i++)
+    {
+        //Read each line of the file and store it in the array
+        getline(myfile_read, line);
+        numbers[i] = atof(line.c_str());
+    }
+    myfile_read.close();
+
+    //Print the array
+    //Now, the array contains the data from the file
+    //It prints 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    for(int i = 0; i < 10; i++) cout << numbers[i] << endl;
+
+
+
+    cout << endl << "Saving into a binary file" << endl;
+    //Doing the same with a binary file
+    //Write a binary file
+    filename = ref + ".data";
+    const char* nameout = filename.c_str();
+    ofstream out(nameout, std::ios::out | std::ios::binary);
+    out.write((char *) numbers, 10*sizeof(int));
+    out.close();
+
+    //Clear the array
+    memset(numbers, 0, 10*sizeof(int));
+    //Print the array
+    //This prints an array full of 0, as the data contained in them was deleted
+    for(int i = 0; i < 10; i++) cout << numbers[i] << endl;
+
+    //Read the binary file
+    const char* nameoutb = filename.c_str();
+    ifstream in(nameoutb, std::ios::in | std::ios::binary);
+    in.read((char *) numbers, 10*sizeof(int));
+    in.close(); //Close the file
+
+    //Print the array
+    //Now, the array contains the data from the file
+    //It prints 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    for(int i = 0; i < 10; i++) cout << numbers[i] << endl;
+    //The binary file looks nothing like the data, depending on the text editor it shows random characters
+    //This is because the computer is trying to read the data as characters, when it is pure binary numbers
+    //One might want to use the binary format for its efficiency, as well as the privacy added to not being able to directly see the data
+
+
+
+    cout << endl << "Time execution of saving methods" << endl;
+    //We are going to measure the execution time of the saving methods by saving with different number elements, multiples of num
+    //Initialize random seed
+    srand(time(NULL));
+
+    int n = 50;
+
+    //Test 10 different array sizes
+    for(int i = 1; i <= 10; i++)
+    {
+        //Create array to be saved
+        double arrSave[num*i];
+        //Give array random values
+        for(int b = 0; b < num*i; b++)
+        {
+            arrSave[b] = rand() % num*i + 1;
+        }
+
+        cout << endl << "Execution times for size " << num*i << endl;
+
+        //Measure time of text data
+        //Average over n iterations
+        int t1 = mm_systime();  //Calling the function returns the time in milliseconds
+        for(int s = 0; s < n; s++)
+        {
+            //Code which time is to be measured
+            //Saving a file
+            string filename;
+            //Write an ASCII file
+            ofstream myfile;
+            filename = ref + to_string(num*i) + "text.txt";
+            myfile.open(filename.c_str());
+            for(int h = 0; h < num*i; h++) myfile << arrSave[h] << endl;
+            myfile.close();
+        }
+        int t2 = mm_systime(); //Get time in milliseconds
+        //Print measured time per iteration
+        cout << "Execution time (text file): " << (double(t2 - t1) / 1000.) / n << " seconds" << endl;
+
+        //Measure time of binary data
+        //Average over n iterations
+        int t1 = mm_systime();  //Calling the function returns the time in milliseconds
+        for(int s = 0; s < n; s++)
+        {
+            //Write a binary file
+            filename = ref + to_string(num*i) + "text.txt";
+            const char* nameout = filename.c_str();
+            ofstream out(nameout, std::ios::out | std::ios::binary);
+            out.write((char *) arrSave, (i*num)*sizeof(int));
+            out.close();
+        }
+        int t2 = mm_systime(); //Get time in milliseconds
+        //Print measured time per iteration
+        cout << "Execution time (binary file): " << (double(t2 - t1) / 1000.) / n << " seconds" << endl;
+    }
 }
