@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstring>
 #include <cstdlib>
+#include <unistd.h>
 
 #include <stdlib.h> 
 #include <string>
@@ -11,6 +12,14 @@
 
 #include <sstream>
 #include <iomanip>
+
+//functions for cosmological values
+#include "aoft.h"
+#include "dofa.h"
+#include "eofa.h"
+#include "fofa.h"
+#include "omofa.h"
+#include "tofa.h"
 
 using namespace std;
 
@@ -224,7 +233,7 @@ int main(int argc, char *argv[])
     //Initialize random seed
     srand(time(NULL));
 
-    int n = 50;
+    int n = 1;
 
     //Test 10 different array sizes
     for(int i = 11; i <= 20; i++)
@@ -336,4 +345,33 @@ int main(int argc, char *argv[])
     cout << arond_st(test, 8) << endl;  //Prints 234.25425090
     cout << arond_st(test, 10) << endl;  //Prints 234.2542509000
     //As it can be seen, the function allows us to set the number of decimal numbers that we want to be represented in the string
+
+
+
+
+
+	//Functions and plotting
+	//The functions defined in the header files will be tested
+	double omegam0 = 0.27;
+	double omegalambda0 = 0.73;
+	double H0 = 0.5;
+	double aValues[200];
+	double omegam[200];
+	double d[200];
+
+	//Set a values to be between 0 and 10
+	for (int i = 0; i < 200; i++)
+	{
+		aValues[i] = i / 20.;
+		omegam[i] = omofa(aValues[i], H0, omegam0, omegalambda0);
+		d[i] = dofa(aValues[i], H0, omegam0, omegalambda0);
+	}
+
+	//Plotting the values with gnuplot using C commands
+	FILE *g;
+	g = popen("gnuplot", "w");
+	fprintf(g, "plot \"asdf.txt\" u 1\n");
+	fflush(g);
+	sleep(1);
+	pclose(g);
 }
