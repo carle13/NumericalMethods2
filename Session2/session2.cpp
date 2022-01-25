@@ -7,27 +7,6 @@
 
 using namespace std;
 
-double mean(double data[], int length)
-{
-    double sum = 0.;
-    for(int i = 0; i < length; i++)
-    {
-        sum += data[i];
-    }
-    return sum / length;
-}
-
-double errorMean(double data[], int length)
-{
-    double sumSquared = 0.;
-    for(int i = 0; i < length; i++)
-    {
-        sumSquared += pow(data[i], 2.);
-    }
-    double sigmaSquared = - pow(mean(data, length), 2.) + sumSquared/length;
-    return sqrt(sigmaSquared / length);
-}
-
 int main()
 {
     //Get data from the file
@@ -52,7 +31,6 @@ int main()
     */
 
     //Get data from the file for measured data
-    
     fileName = "PARTICLES/initial_positions.data";
     lenFile = 2048;
     double measured[lenFile];
@@ -62,15 +40,19 @@ int main()
     //Estimate power spectrum
     double *powerMeasured = estimateSpectrum(measured, lenFile, 1000);
     for(int i = 0; i < 10; i++) cout << powerMeasured[i] << endl;
-    write_binary("powerSpectrumMeasured.data", lenFile, powerMeasured);
+    //Save power spectrum into a file
+    write_binary("powerSpectrumMeasured.data", 1025, powerMeasured);
 
 
+    //Initialize arrays for average and error of the average
     double averageSpectrum[lenFile];
+    double errorAverage[lenFile];
     for(int i = 0; i < lenFile; i++)
     {
         averageSpectrum[i] = 0.;
+        errorAverage[i] = 0.;
     }
-    //Read all files
+    //Read all 201 files
     for(int i = 0; i <= 200; i++)
     {
         //Get data from the file
@@ -80,14 +62,21 @@ int main()
         read_binary(fileName, lenFile, measured);
         //Estimate power spectrum
         double *powerMeasured = estimateSpectrum(measured, lenFile, 1000);
+        //Calculate sum and sum squared
         for(int b = 0; b < lenFile; b++)
         {
             averageSpectrum[b] += powerMeasured[b];
+            errorAverage[b] += powerMeasured[b] * powerMeasured[b];
         } 
     }
+    //Calculate average and error of the average
     for(int i = 0; i < lenFile; i++)
     {
         averageSpectrum[i] /= 201;
+        errorAverage[i] = (errorAverage[i] / 201) - (averageSpectrum[i] * averageSpectrum[i]);
+        errorAverage[i] = sqrt(errorAverage[i]);
     }
-    write_binary("averageSpectrum.data", lenFile, averageSpectrum);
+    //Save them into files
+    write_binary("averageSpectrum.data", 1025, averageSpectrum);
+    write_binary("errorSpectrum.data", 1025, errorAverage);
 }

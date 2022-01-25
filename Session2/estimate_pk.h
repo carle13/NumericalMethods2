@@ -9,7 +9,7 @@ double* estimateSpectrum(double* positions, int nParticles, double period)
     //Array to be returned
     static double* spectrum = new double[Nk];
     
-    //Sampling frequency
+    //Fundamental frequency
     double kf = 2. * M_PI / period;
     //Calculating the Fourier series of the density contrast
     for(int b = 0; b < Nk; b++)
