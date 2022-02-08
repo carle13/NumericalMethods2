@@ -6,31 +6,16 @@
 #include <iostream>
 #include <fstream>
 #include <random>
-// #include "ic_generator_bis.h"
+#include "ic_generator_bis.h"
 
 using namespace std;
 
 int main()
 {
-	//Get a true random number
-	random_device seed;
+	int realisations = 200;  //Number of realizations
 
-	//Initialize the random generator
-	default_random_engine generator(seed());
-
-	//Define a distribution
-	uniform_real_distribution<double> distribution(0.0, 1.0);
-
-	//Define the random variable
-	double epsilon;
-
-	int nk = 200;  //Number of random values obtained
-
-	for(int n = 0; n < nk; n++)
+	for(int i = 0; i < realisations; i++)
 	{
-		//Call a random number following the required distribution
-		epsilon = distribution(generator);
-
-		//Get random distributions
+		
 	}
 }

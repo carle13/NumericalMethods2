@@ -1,5 +1,3 @@
-#ifndef SPEC
-#define SPEC
 #include <cmath>
 #include <iostream>
 using namespace std;
@@ -33,5 +31,3 @@ double* estimateSpectrum(double* positions, int nParticles, double period)
     }
    return spectrum;
 }
-
-#endif /* SPEC */

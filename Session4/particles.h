@@ -1,194 +1,254 @@
-#ifndef PARTIC
-#define PARTIC
-
 #include <iostream>
 #include <stdlib.h>
 #include <fstream>
 #include <cstring>
 #include <iostream>
 
-class particles
+class particles {
+
+friend void cross_acceleration(  particles &p1, particles &p2); 
+
+  public:
+
+ long num ;
+ double * x ;
+ double * v ;
+ double * a ; 
+
+  particles() { num=1; x[0]=0 ; v[0]=0; a[0]=0; } 
+
+  //IF ONLY ONE ARGUMENT
+  particles(long numo) 
+  { 
+  num = numo;  
+  x = new double [num] ;
+  v = new double [num] ;
+  a = new double [num] ; 
+  std::memset(x, 0, num*sizeof(double));  
+  std::memset(v, 0, num*sizeof(double)); 
+  std::memset(a, 0, num*sizeof(double)); 
+  } 
+
+  //IF ONLY TWO ARGUMENTS
+  particles(long numo, double * xp) 
 {
-    private:
-    //What is here is private
-    long num;   //Number of particles
-    double *x;  //Pointer to a double array containing the positions
-    double *v;  //Pointer to a double array containing the velocities
-    double *a;  //Pointer to a double array containing the accelerations
-    double Sg(double x) //Private implementation of the Sg function just to use in this class
-    {
-        if (x > 0) return 1;
-        if (x < 0) return -1;
-        return 0;
-    }
+  num = numo; 
+  x = new double [num] ;
+  v = new double [num] ;
+  a = new double [num] ; 
+  for (int i=0; i<num;i++) 
+   { 
+     x[i]=*(xp++) ; 
+   } 
+std::memset(v, 0, num*sizeof(double)); 
+std::memset(a, 0, num*sizeof(double)); 
+}
 
-    public:
-    //What is here is public and can be accessed from anywhere
+ //IF ONLY THREE ARGUMENTS
+  particles(long numo, double * xp, double * vp) 
+{
+  num = numo; 
+  x = new double [num] ;
+  v = new double [num] ;
+  a = new double [num] ; 
+  for (int i=0; i<num;i++) 
+   { 
+     x[i]=*(xp++) ;
+     v[i]=*(vp++) ; 
+   } 
 
-    //Class constructor without parameters
-    particles()
-    {
-        num = 1;
-        x = new double[num];
-        v = new double[num];
-        a = new double[num];
-    }
+std::memset(a, 0, num*sizeof(double)); 
+}
 
-    //Class constructor for only one argument
-    particles(long num0)
-    {
-        num = num0;
-        x = new double[num];
-        v = new double[num];
-        a = new double[num];
+ //IF ONLY FOUR ARGUMENTS
+  particles(long numo, double * xp, double * vp, double * ap) 
+{
+  num = numo; 
+  x = new double [num] ;
+  v = new double [num] ;
+  a = new double [num] ; 
+  for (int i=0; i<num;i++) 
+   { 
+     x[i]=*(xp++) ; 
+     v[i]=*(vp++) ;
+     a[i]=*(ap++) ;
+   } 
+}
 
-        //Initialize the vectors to zero
-        std::memset(x, 0, num*sizeof(double));
-        std::memset(v, 0, num*sizeof(double));
-        std::memset(a, 0, num*sizeof(double));
-    }
 
-    //Class constructor for when two arguments are given
-    particles(long num0, double *xp)
-    {
-        num = num0;
-        x = new double[num];
-        v = new double[num];
-        a = new double[num];
+  ~particles() { }
+//      il s'agissait de prototypes de fonctions, d'où le point-virgule 
 
-        //Copy data from the array given as argument
-        for(int i = 0; i < num; i++)
-        {
-            x[i] = xp[i];
-        }
-        std::memset(v, 0, num*sizeof(double));
-        std::memset(a, 0, num*sizeof(double));
-    }
+//      les fonctions écrites complètement dans la déclaration de la classe sont inline par défaut
 
-    //Class constructor used when positions and velocities are set
-    particles(long num0, double *xp, double *vp)
-    {
-        num = num0;
-        x = new double[num];
-        v = new double[num];
-        a = new double[num];
+//PROVIDE A WAY OF SETTING POSITIONS FROM THE DEFINITION OF AN ARRAY:
+  void setX(double * xp) { for (int i=0; i<num;i++) { x[i]=*(xp++) ; }  } 
+  void setV(double * vp) { for (int i=0; i<num;i++) { v[i]=*(vp++) ; }  } 
+  void setA(double * ap) { for (int i=0; i<num;i++) { a[i]=*(ap++) ; }  }
 
-        //Copy data from the array given as argument
-        for(int i = 0; i < num; i++)
-        {
-            x[i] = xp[i];
-            v[i] = vp[i];
-        }
-        std::memset(a, 0, num*sizeof(double));
-    }
+  //GET A PARTICULAR VALUE
+  double getXelem(int i) { return x[i]; }
+  double getVelem(int i) { return v[i]; }
+  double getAelem(int i) { return a[i]; }
 
-    //Class destructor
-    ~particles() {}
+//PROVIDE A WAY OF READING AN EXTERNAL BINARY FILE:
+void setXbin(std::string file_name) 
+{   
+  const char * nameout = file_name.c_str();  
+  std::ifstream in( nameout , std::ios::in | std::ios::binary );
+  in.read((char *) x, num*sizeof(double) ) ;
+  in.close(); //CLOSE THE FILE
+} 
 
-    //Setter methods
-    //Provide a way of setting positions from the definition of an array
-    void setX(double *xp)
-    {
-        for(int i = 0; i < num; i++)
-        {
-            x[i] = xp[i];
-        }
-    }
+void setVbin(std::string file_name) 
+{   
+  const char * nameout = file_name.c_str();  
+  std::ifstream in( nameout , std::ios::in | std::ios::binary );
+  in.read((char *) v, num*sizeof(double) ) ;
+  in.close(); //CLOSE THE FILE
+} 
 
-    void setV(double *vp)
-    {
-        for(int i = 0; i < num; i++)
-        {
-            v[i] = vp[i];
-        }
-    }
+void setAbin(std::string file_name) 
+{   
+  const char * nameout = file_name.c_str();  
+  std::ifstream in( nameout , std::ios::in | std::ios::binary );
+  in.read((char *) a, num*sizeof(double) ) ;
+  in.close(); //CLOSE THE FILE
+} 
 
-    void setA(double *ap)
-    {
-        for(int i = 0; i < num; i++)
-        {
-            a[i] = ap[i];
-        }
-    }
+//OUTPUT INTO A BINARY FILE:
+void getXbin(std::string file_name) 
+{   
+  const char * nameout = file_name.c_str();  
+  std::ofstream out(nameout, std::ios::out | std::ios::binary); //Open THE FILE
+  out.write((char *) x, num*sizeof(double)); //WRITE INTO THE FILE
+  out.close(); //CLOSE THE FILE
+}
 
-    //Getter methods
-    //Get a particular value
-    double getXelem(int i) {return x[i];}
-    double getVelem(int i) {return v[i];}
-    double getAelem(int i) {return a[i];}
+void getVbin(std::string file_name) 
+{   
+  const char * nameout = file_name.c_str();  
+  std::ofstream out(nameout, std::ios::out | std::ios::binary); //Open THE FILE
+  out.write((char *) v, num*sizeof(double)); //WRITE INTO THE FILE
+  out.close(); //CLOSE THE FILE
+}
 
-    //Read array values from a binary file
-    void setXFile(std::string filename)
-    {
-        const char* nameoutb = filename.c_str();
-        std::ifstream in(nameoutb, std::ios::in | std::ios::binary);
-        in.read((char *) x, num*sizeof(double));
-        in.close(); //Close the file
-    }
+void getAbin(std::string file_name) 
+{   
+  const char * nameout = file_name.c_str();  
+  std::ofstream out(nameout, std::ios::out | std::ios::binary); //Open THE FILE
+  out.write((char *) a, num*sizeof(double)); //WRITE INTO THE FILE
+  out.close(); //CLOSE THE FILE
+}
 
-    void setVFile(std::string filename)
-    {
-        const char* nameoutb = filename.c_str();
-        std::ifstream in(nameoutb, std::ios::in | std::ios::binary);
-        in.read((char *) v, num*sizeof(double));
-        in.close(); //Close the file
-    }
+//METHOD TO MOOVE THE PARTICLES:
+void moove (double dt, double lbox)
+{
+  double abs_pos ;
+  for (int i=0; i<num;i++) 
+   { 
+     abs_pos = x[i] + v[i]*dt ;
+     x[i] =  abs_pos + double(abs_pos < 0)*lbox - double( abs_pos > lbox )*lbox  ;
+     v[i]+= a[i]*dt ;
+   } 
+}
 
-    //Save array values into a binary file
-    void saveXFile(std::string filename)
-    {
-        //Write a binary file
-        const char* nameout = filename.c_str();
-        std::ofstream out(nameout, std::ios::out | std::ios::binary);
-        out.write((char *) x, num*sizeof(int));
-        out.close();
-    }
+//METHOD TO COMPUTE THE ACCELERATION:
+void acceleration ( double hi, double coef, double lbox ) 
+{ 
+  double xi, dij, somme ; //, gamg, game;
+  double lboxsur2 = lbox/2. ;
+  double hi2 = 2.*hi ;
+  
+for (int i=0; i<num;i++)
+   {
+   xi = x[i] ;
+   somme = 0.;
+   for (int j=0; j<num;j++)
+     {
+       if (j != i) 
+	 {
+	   //xj = x[j]  ;
+       dij = x[j]-xi ;
+       dij = dij - double(dij > lboxsur2)*lbox + double(dij < -lboxsur2)*lbox ;
+       somme +=  1.-2.*double(signbit(dij)) - dij/lboxsur2 ;
+       
+	 }
+     }
+   a[i] = coef*somme - hi2*v[i] ;
+   }
 
-    void saveVFile(std::string filename)
-    {
-        //Write a binary file
-        const char* nameout = filename.c_str();
-        std::ofstream out(nameout, std::ios::out | std::ios::binary);
-        out.write((char *) v, num*sizeof(int));
-        out.close();
-    }
+}
 
-    //Move the particles
-    void move(double dt, double L)
-    {
-        for(int i = 0; i < num; i++)
-        {
-            v[i] += dt * a[i];
-            x[i] += v[i];
-            /*
-            if(x[i] >= L)
-            {
-                x[i] -= L;
-            }
-            else if(x[i] < 0)
-            {
-                x[i] += L;
-            }
-            */
-            x[i] += - (x[i] >= L) * L + (x[i] <  0) * L;
-        }
-    }
+//METHOD TO COMPUTE THE POTENTIALS:
+void potentials ( double coef, double lbox, double * phipec, double * phiback ) 
+{ 
+  double xi, dij, sommep, sommeb ; //, gamg, game;
+  double lboxsur2 = lbox/2. ;
+  //double hi2 = 2.*hi ;
+  
+for (int i=0; i<num;i++)
+   {
+   xi = x[i] ;
+   sommep = 0.;
+   sommeb = 0.;
+   for (int j=0; j<num;j++)
+     {
+       if (j != i) 
+	 {
+	   //xj = x[j]  ;
+       dij = x[j]-xi ;
+       dij = dij - double(dij > lboxsur2)*lbox + double(dij < -lboxsur2)*lbox ;
+       sommep +=  abs(dij) ; //- dij/lboxsur2 ;
+       sommeb += dij*dij ;
+	 }
+     }
+   phipec[i] = coef*sommep ;
+   phiback[i] = -coef*sommeb/lbox ;
+   }
 
-    void calcAcc(double co, double L, double H)
-    {
-        for(int i = 0; i < num; i++)
-        {
-            double gField = 0;
-            for(int b = 0; b < num; b++)
-            {
-                double diff = x[b] - x[i];
-                diff += - (diff >= L/2) * L + (diff < 0) * L;
-                gField += Sg(diff) - 2 * (diff / L);
-            }
-            gField *= co;
-            a[i] = gField - 2 * H * v[i];
-        }
-    }
-};
+}
 
-#endif //PARTIC
+//METHOD TO MOOVE THE PARTICLES:
+void working (double dt, double coefw, double * work)
+{
+  for (int i=0; i<num;i++) work[i] += coefw*v[i]*v[i]*dt ;
+}
+
+void gworking (double dt, double coefg, double hi, double * workg)
+{
+  double h2 = hi*2. ;
+  for (int i=0; i<num;i++) workg[i] += coefg*(a[i] + h2*v[i])*v[i]*dt ;
+}
+
+
+//         on pourrait continuer avec 
+
+//         suivi des choses qu'on veut déclarer privées à cet endroit
+
+}  ;
+
+
+inline void cross_acceleration(particles &p1, particles &p2, double coef, double lbox )
+{ 
+  double xi, dij, somme ; //, gamg, game;
+  double lboxsur2 = lbox/2. ;
+  double num1 = p1.num ;
+  double num2 = p2.num ;
+
+for (int i=0; i<num1;i++)
+   {
+   xi = p1.x[i] ;
+   somme = 0.;
+   for (int j=0; j<num2;j++)
+     {
+	   //xj = x[j]  ;
+       dij = p2.x[j]-xi ;
+       dij = dij - double(dij > lboxsur2)*lbox + double(dij < -lboxsur2)*lbox ;
+       somme +=  1.-2.*double(signbit(dij)) - dij/lboxsur2 ;
+     }
+   p1.a[i] += coef*somme ;
+   }
+
+}
+
