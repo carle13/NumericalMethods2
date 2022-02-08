@@ -20,10 +20,10 @@ int main()
 {
 	//Simulation parameters:
 	int Np = 2048;  //Number of particles
-	int timeSteps = 1000;  //Number of timesteps
-	int realisations = 100;  //Number of realisations to be performed
+	int timeSteps = 500;  //Number of timesteps
+	int realisations = 10;  //Number of realisations to be performed
 	string dataFile = "./Data/";  //Name of the files containing the data of the simulation
-	int snaps = 50;  //Number of snapshots to be saved
+	int snaps = 3;  //Number of snapshots to be saved
 	bool randPos = true;  //Bool to specify if positions should be randomized
 	double L = 1000;  //Periodic box size
 	double H0 = 100;  //H0 value
@@ -90,9 +90,12 @@ int main()
 			a = s * s;
 			double nt = tofa(a, omegam0);
 			dt = nt - t;
+			double c = 2 * M_PI * (1.3936388 * pow(10, -28)) * omegam0 * (2.77573 * pow(10, 11));
+			c *= L / (Np * a);
+			syst.acceleration(H0*eofa(a, omegam0), 4.5, L);
 			syst.moove(dt, L);
 
-			if(b % (timeSteps / (snaps - 2)) == 0 && b != timeSteps)
+			if(b % (timeSteps / snaps) == 0 && b != timeSteps)
 			{
 				//Save snapshot
 				syst.getXbin(dataFile + "pos" + to_string(b) + ".data");
@@ -116,8 +119,8 @@ int main()
 	//Calculate average and error of the average for initial realisations
 	for(int i = 0; i < 1025; i++)
 	{
-		iaverageSpectrum[i] /= 201;
-		ierrorAverage[i] = (ierrorAverage[i] / 201) - (iaverageSpectrum[i] * iaverageSpectrum[i]);
+		iaverageSpectrum[i] /= realisations;
+		ierrorAverage[i] = (ierrorAverage[i] / realisations) - (iaverageSpectrum[i] * iaverageSpectrum[i]);
 		ierrorAverage[i] = sqrt(ierrorAverage[i]);
 	}
 	//Save them into files
@@ -126,8 +129,8 @@ int main()
 	//Calculate average and error of the average for final realisations
 	for (int i = 0; i < 1025; i++)
 	{
-		faverageSpectrum[i] /= 201;
-		ferrorAverage[i] = (ferrorAverage[i] / 201) - (faverageSpectrum[i] * faverageSpectrum[i]);
+		faverageSpectrum[i] /= realisations;
+		ferrorAverage[i] = (ferrorAverage[i] / realisations) - (faverageSpectrum[i] * faverageSpectrum[i]);
 		ferrorAverage[i] = sqrt(ferrorAverage[i]);
 	}
 	//Save them into files
