@@ -38,6 +38,19 @@ int main()
 	double t = tofa(a, omegam0);
 	double dt = 0;
 
+	//Initialize arrays for average and error of the average
+	double iaverageSpectrum[1025];
+	double ierrorAverage[1025];
+	double faverageSpectrum[1025];
+	double ferrorAverage[1025];
+	for(int i = 0; i < 1025; i++)
+	{
+		iaverageSpectrum[i] = 0.;
+		ierrorAverage[i] = 0.;
+		faverageSpectrum[i] = 0.;
+		ferrorAverage[i] = 0.;
+	}
+
 	//PERFORM REALISATIONS
 	for(int i = 0; i < realisations; i++)
 	{
@@ -63,7 +76,12 @@ int main()
 		syst.getVbin(dataFile + "vel0.data");
 		syst.getAbin(dataFile + "acc0.data");
 		double *spec = syst.spectrumSystem(L);
-		write_binary(dataFile + "spec0.data", 1025, spec);
+		//Calculate sum and sum squared
+		for (int b = 0; b < 1025; b++)
+		{
+			iaverageSpectrum[b] += spec[b];
+			ierrorAverage[b] += spec[b] * spec[b];
+		}
 
 		//PERFORM THE SIMULATION STEPS
 		for(int b = 1; b <= timeSteps; b++)
@@ -80,8 +98,6 @@ int main()
 				syst.getXbin(dataFile + "pos" + to_string(b) + ".data");
 				syst.getVbin(dataFile + "vel" + to_string(b) + ".data");
 				syst.getAbin(dataFile + "acc" + to_string(b) + ".data");
-				spec = syst.spectrumSystem(L);
-				write_binary(dataFile + "spec" + to_string(b) + ".data", 1025, spec);
 			}
 			t = nt;
 		}
@@ -90,6 +106,31 @@ int main()
 		syst.getVbin(dataFile + "vel" + to_string(timeSteps) + ".data");
 		syst.getAbin(dataFile + "acc" + to_string(timeSteps) + ".data");
 		spec = syst.spectrumSystem(L);
-		write_binary(dataFile + "spec" + to_string(timeSteps) + ".data", 1025, spec);
+		//Calculate sum and sum squared
+		for (int b = 0; b < 1025; b++)
+		{
+			faverageSpectrum[b] += spec[b];
+			ferrorAverage[b] += spec[b] * spec[b];
+		}
 	}
+	//Calculate average and error of the average for initial realisations
+	for(int i = 0; i < 1025; i++)
+	{
+		iaverageSpectrum[i] /= 201;
+		ierrorAverage[i] = (ierrorAverage[i] / 201) - (iaverageSpectrum[i] * iaverageSpectrum[i]);
+		ierrorAverage[i] = sqrt(ierrorAverage[i]);
+	}
+	//Save them into files
+	write_binary("initialAverageSpectrum.data", 1025, iaverageSpectrum);
+	write_binary("initialErrorSpectrum.data", 1025, ierrorAverage);
+	//Calculate average and error of the average for final realisations
+	for (int i = 0; i < 1025; i++)
+	{
+		faverageSpectrum[i] /= 201;
+		ferrorAverage[i] = (ferrorAverage[i] / 201) - (faverageSpectrum[i] * faverageSpectrum[i]);
+		ferrorAverage[i] = sqrt(ferrorAverage[i]);
+	}
+	//Save them into files
+	write_binary("finalAverageSpectrum.data", 1025, faverageSpectrum);
+	write_binary("finalErrorSpectrum.data", 1025, ferrorAverage);
 }
