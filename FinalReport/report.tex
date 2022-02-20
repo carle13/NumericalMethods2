@@ -1,0 +1,26 @@
+Without using threads
+int Np = 2048;  //Number of particles
+int timeSteps = 1000;  //Number of timesteps
+int realisations = 50;  //Number of realisations to be performed
+int snaps = 10;  //Number of snapshots to be saved
+bool randPos = true;  //Bool to specify if positions should be randomized
+double L = 1000;  //Periodic box size
+double H0 = 100;  //H0 value
+double omegam0 = 0.32;  //density
+TOTAL EXECUTION TIME: 2734.69seconds
+TIME PER REALISATION: 54.6938seconds
+
+
+Using threads
+int Np = 2048;  //Number of particles
+int timeSteps = 1000;  //Number of timesteps
+int realisations = 50;  //Number of realisations to be performed
+int snaps = 10;  //Number of snapshots to be saved
+bool randPos = true;  //Bool to specify if positions should be randomized
+double L = 1000;  //Periodic box size
+double H0 = 100;  //H0 value
+double omegam0 = 0.32;  //density
+TOTAL EXECUTION TIME: 1086 seconds
+TIME PER REALISATION: 21.72 seconds
+
+Around 2.5 times faster

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include "ic_generator.h"
+#include "mm_systime.h"
 
 //functions for cosmological values
 #include "dofa.h"
@@ -18,12 +19,12 @@ using namespace std;
 
 int main()
 {
+	double t1Total = mm_systime();
 	//Simulation parameters:
 	int Np = 2048;  //Number of particles
-	int timeSteps = 500;  //Number of timesteps
-	int realisations = 10;  //Number of realisations to be performed
-	string dataFile = "./Data/";  //Name of the files containing the data of the simulation
-	int snaps = 3;  //Number of snapshots to be saved
+	int timeSteps = 1000;  //Number of timesteps
+	int realisations = 50;  //Number of realisations to be performed
+	int snaps = 10;  //Number of snapshots to be saved
 	bool randPos = true;  //Bool to specify if positions should be randomized
 	double L = 1000;  //Periodic box size
 	double H0 = 100;  //H0 value
@@ -73,9 +74,10 @@ int main()
 
 		//Save initial conditions
 		syst.getXbin(dataFile + "pos0.data");
-		syst.getVbin(dataFile + "vel0.data");
-		syst.getAbin(dataFile + "acc0.data");
+		// syst.getVbin(dataFile + "vel0.data");
+		// syst.getAbin(dataFile + "acc0.data");
 		double *spec = syst.spectrumSystem(L);
+		write_binary(dataFile + "spec0.data", 1025, spec);
 		//Calculate sum and sum squared
 		for (int b = 0; b < 1025; b++)
 		{
@@ -99,16 +101,19 @@ int main()
 			{
 				//Save snapshot
 				syst.getXbin(dataFile + "pos" + to_string(b) + ".data");
-				syst.getVbin(dataFile + "vel" + to_string(b) + ".data");
-				syst.getAbin(dataFile + "acc" + to_string(b) + ".data");
+				// syst.getVbin(dataFile + "vel" + to_string(b) + ".data");
+				// syst.getAbin(dataFile + "acc" + to_string(b) + ".data");
+				spec = syst.spectrumSystem(L);
+				write_binary(dataFile + "spec" + to_string(b) + ".data", 1025, spec);
 			}
 			t = nt;
 		}
 		//Save final conditions
 		syst.getXbin(dataFile + "pos" + to_string(timeSteps) + ".data");
-		syst.getVbin(dataFile + "vel" + to_string(timeSteps) + ".data");
-		syst.getAbin(dataFile + "acc" + to_string(timeSteps) + ".data");
+		// syst.getVbin(dataFile + "vel" + to_string(timeSteps) + ".data");
+		// syst.getAbin(dataFile + "acc" + to_string(timeSteps) + ".data");
 		spec = syst.spectrumSystem(L);
+		write_binary(dataFile + "spec" + to_string(timeSteps) + ".data", 1025, spec);
 		//Calculate sum and sum squared
 		for (int b = 0; b < 1025; b++)
 		{
@@ -116,6 +121,10 @@ int main()
 			ferrorAverage[b] += spec[b] * spec[b];
 		}
 	}
+	double t2Total = mm_systime();
+	cout << "TOTAL EXECUTION TIME: " << double(t2Total-t1Total)/1000. << " seconds" << endl;
+	cout << "TIME PER REALISATION: " << double(t2Total-t1Total)/(1000 * realisations) << " seconds" << endl;
+
 	//Calculate average and error of the average for initial realisations
 	for(int i = 0; i < 1025; i++)
 	{
