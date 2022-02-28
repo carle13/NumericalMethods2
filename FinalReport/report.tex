@@ -1,3 +1,329 @@
+\documentclass[12pt]{article}
+\newtheorem{theorem}{Theorem}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage[style=numeric,sorting=none,maxbibnames=9,autopunct=true,babel=hyphen,hyperref=true,backend=biber]{biblatex}
+
+\usepackage{xcolor}
+\usepackage{lmodern}
+\usepackage{listings}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=false,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{mygreen},    % comment style
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{blue},       % keyword style
+  language=[90]Fortran,                 % the language of the code
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+  rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{mymauve},     % string literal style
+  tabsize=4,                       % sets default tabsize to 2 spaces
+  title=\lstname,                   % show the filename of files
+}
+
+\bibliography{references}
+\begin{document}
+
+\title{A numerical checking of the Central Limit Theorem \\ Numerical Methods Final Project}
+\author{Carlos Rafael Salazar Letona \\ s21205751}
+\maketitle
+
+\section*{Introduction}
+
+\subsection*{Central Limit Theorem}
+The normal or gaussian distribution is a continuous probability distribution with a density function defined as:
+
+\begin{equation}
+	f(x) = \frac{1}{\sigma \sqrt{2 \pi}} \exp \left( -\frac{1}{2} {\left( \frac{x - \mu}{\sigma}\right)}^{2}\right)
+\end{equation}
+
+Where \(\mu\) is the mean and \(\sigma\) is the standard deviation\cite{ref:normalWiki}. The curve described by the previos equation is shown in fig~\ref{ref:normalCurve}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\linewidth]{normalDistributions.png}
+	\caption{Different normal distributions and their corresponding mean and standard deviation squared (variance)\cite{ref:normalWiki}.}
+	\label{ref:normalCurve}
+\end{figure}
+
+More formally, the central limit theorem can be stated as:
+
+\begin{theorem}
+	Let \(x_{1}, x_{2}, \cdots, x_{n}\) be independent random variables having the same probability distribution, with an average \(\mu\) and standard deviation \(\sigma\). Let us consider the sum \(S_{n} = x_{1} + x_{2} + \cdots + x_{n}\). For large values of n, the distribution of \(S_{n}\) tends towards a gaussian distribution with an average \(n \mu\) and standard deviation \(\sigma n^{1/2}\).
+\end{theorem}
+
+\subsection*{Uniform Random Distribution}
+In this project, the random variables used to test the Central Limit Theorem were uniformly distributed. The uniform distribution is a continuous probability distribution in which the events are equally likely to occur. A visual representation of this can be seen on fig~\ref{ref:uniformCurve}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\linewidth]{uniformDistribution.png}
+	\caption{Uniform probability density function\cite{ref:uniformWiki}.}
+	\label{ref:uniformCurve}
+\end{figure}
+
+The uniform density function is defined between the values of $a$ and $b$, and has the same value inside this range. The mean and standard deviation of this distribution are defined as\cite{ref:uniformStats}:
+
+\begin{equation}
+	\mu = \frac{a + b}{2}
+	\label{eq:mean}
+\end{equation}
+\begin{equation}
+	\sigma = \sqrt{\frac{{\left( b - a \right)}^{2}}{12}}
+	\label{eq:standard}
+\end{equation}
+
+
+\section*{Problem and modelling}
+In this project we are concerned with performing a numerical check of the Central Limit Theorem. In order to do this we can consider $n$ random variables. It needs to be proven that the sum of these random variables approaches the normal distribution, with the characteristics described by the Central Limit Theorem. This problem can be modelled by obtaining independent random numbers from a computer and adding them up. After doing this many times a distribution of the results of the sums can be obtained.
+
+
+\section*{Approach and numerical methods used}
+In order to check the Central Limit Theorem a Fortran code was written. The purpose of which was to get the distribution of the sum $S_{n}$ of $n$ random variables. In order to do this, a histogram representation was prepared using the code.
+
+Realistically, the sum of the random variables cannot be calculated an infinite amount of times. For this reason, a numerical method is needed. For this purpose, the Monte Carlo method was used. The Monte Carlo methods rely on repeated random sampling to in order to get numerical results\cite{ref:monteCarloWiki}. In this case, the sum of the random variables is what is calculated many times, each time using new random numbers. Using this method, we will get an approximation to the distribution of $S_{n}$ that depends on the number of iterations.
+
+The Fortran code proceded as follows:
+
+\begin{enumerate}
+	\item The variables are defined. In this case, $Sn$ will represent the sum of the random variables $x$. The variables $i$ and $b$ are used as counters for the for loops. The variable $n$ represents the number of random variables used for the sum, and $iterations$ is the number of times $Sn$ is calculated, i.e. the Monte Carlo part of the algorithm. Lastly, the variable $pos$ will point to the element of the array $bins$ that needs to be increased depending on the value of $Sn$. The size of $bins$ is set to be twice the value of $n$ in order to cover all possible values of $Sn$.
+	\begin{lstlisting}
+		real::Sn, x
+		integer::i, b, n, iterations, pos
+		!Define bins array size to be twice the value 
+		!of n so that it covers all the possible values
+		integer, dimension(100)::bins
+	\end{lstlisting}
+	\item The random number generator is then initiated with the default seed. The value of $n$ will be set to different values for different parts of the project, it will take the values of 5, 10, 50. The number of iterations of the Monte Carlo method is set to 10000000. The $bins$ array is also initialized to get a 0 count for each value. 
+	\begin{lstlisting}
+		!Initiate the random number generator
+		call random_seed()
+
+		n = 50
+		iterations = 10000000
+
+		!Give the bins an initial count of 0
+		do i=0, 2*n
+			bins(i) = 0
+		enddo
+	\end{lstlisting}
+	\item Then, the actual Monte Carlo method can start. This consists in the first loop of the variable $i$ going from 0 to the number of iterations, resulting in many values of $Sn$. Each value of $Sn$ is then calculated using the second for loop of $b$ going from 0 to the number of variables $n$. Inside this loop a random number is obtained, which has a uniform distribution going from 0 to 1. This is then converted to a uniform distribution between -1 and +1, and the resulting number is added to the value of $Sn$. Once the $n$ variables have been added, the count in position i is increased, determined by $i < S_{n} < i+1$. 
+	\begin{lstlisting}
+		!Iterate to get different Sn values
+		do i=0, iterations
+			Sn = 0.0
+			!Iterate to get the sum of x variables Sn
+			do b=0, n
+				call random_number(x)
+				!Define the x variable to 
+				!be between -1 and 1
+				x = 2.0 * x - 1.0
+				Sn = Sn + x
+			enddo
+			!Depending on the value of Sn 
+			!put it in bin with position pos
+			pos = int(floor(Sn + n + 1))
+			bins(pos) = bins(pos) + 1
+		enddo
+	\end{lstlisting}
+	\item The $bins$ array can then be stored in a file which is later used for plotting the data. 
+	\begin{lstlisting}
+		!Write the bin array into a file
+		do i=1, 2*n
+			write(2*n,*)bins(i)
+		enddo
+	\end{lstlisting}
+\end{enumerate}
+
+
+\section*{Analysis of the numerical results}
+The program was executed for three different values of $n$. First, it was executed for $n = 10$. The data obtained was then plotted in a histogram using matplotlib, shown in fig~\ref{ref:histo10}. From this, it can be clearly seen that the distribution of the values of $S_{n}$ follows a normal distribution.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\linewidth]{hist10.png}
+	\caption{Histogram of the normalized distribution for $n = 10$.}
+	\label{ref:histo10}
+\end{figure}
+
+The distribution of $S_{n}$ could then be further compared to a normal distribution by plotting it together with a gaussian curve with mean and standard deviation as described by the Central Limit Theorem, shown in fig~\ref{ref:fit10}. The mean and standard deviation can be obtained from the mean and standard deviation from the distribution of the original random variable. This can be calculated for a uniform distribution using equations~\ref{eq:mean} and~\ref{eq:standard}. The gaussian curve has then to be multiplied by a normalization factor of 10000000 coming from the number of iterations of the Monte Carlo method. It can be seen from the graph, that the histogram closely resembles the shape of the gaussian curve, confirming the Central Limit Theorem.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\linewidth]{fit10.png}
+	\caption{Histogram of the normalized distribution for $n = 10$ and Gaussian curve.}
+	\label{ref:fit10}
+\end{figure}
+
+The program was then executed for values of $n = 5, 50$. The resulting histograms are shown in fig~\ref{fig:histograms}, where it can be seen that both cases also resemble a normal distribution. The gaussian curves that correspond to these distributions can be seen in fig~\ref{fig:fits}. As stated in the Central Limit Theorem, it can be seen that the distribution in fig~\ref{fig:fit50} matches more closely its corresponding gaussian curve, and fig~\ref{fig:fit5} has a worse match, as its $n$ value is lower. Hence, it is proven that higher values of $n$ more closely match the expected normal distribution.
+
+\begin{figure}[htp]
+	\centering
+	\begin{subfigure}[b]{0.9\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{hist5.png}
+		\caption{}
+		\label{fig:histo5}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.9\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{hist50.png}
+		\caption{}
+		\label{fig:histo50}
+	\end{subfigure}
+	\caption{Histograms for values of $n = 5, 50$.}
+	\label{fig:histograms}
+\end{figure}
+
+\begin{figure}[htp]
+	\centering
+	\begin{subfigure}[b]{0.8\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{fit5.png}
+		\caption{}
+		\label{fig:fit5}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.8\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{fit50.png}
+		\caption{}
+		\label{fig:fit50}
+	\end{subfigure}
+	\caption{Histograms for values of $n = 5, 50$ and gaussian curves.}
+	\label{fig:fits}
+\end{figure}
+
+The program was then executed for a different distribution of the original random variable (Fortran code in the appendix). This time, a uniform distribution between 0 and +1 was used, which according to equation~\ref{eq:mean} would result on a non-zero average equals to 0.5. The $n$ value was set to 25. According to the Central Limit Theorem the mean of the corresponding gaussian curve would be $n \mu$, in this case equals to 12.5. As expected, the distribution of $S_{n}$ is no longer centered at zero, like in the previous cases. Now the distribution matches a gaussian curve with average of 12.5 as shown in fig~\ref{ref:fit25}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\linewidth]{fit25.png}
+	\caption{Histogram of the normalized distribution between 0 and +1 for $n = 25$ and Gaussian curve.}
+	\label{ref:fit25}
+\end{figure}
+
+
+\section*{Conclusion}
+In this project it was shown that the Central Limit Theorem can be checked using a numerical method, in this case, the Monte Carlo method. It was shown that the distribution of the sum of random variables $S_{n}$ tends towards a normal distribution with higher number of random variables. Then, it was proved that the average and standard deviation of the distribution of $S_{n}$ can be calculated using the average and standard deviation of the original distribution of the random variables, and that it will always tend to a normal distribution independently of the original distribution.
+
+
+\section*{References}
+\printbibliography[heading=none]
+
+\section*{Appendix}
+Code used for the uniform distribution between -1 and +1.
+\begin{lstlisting}
+	program centralLimit
+
+	!Variables definition
+	real::Sn, x
+	integer::i, b, n, iterations, pos
+	!Define bins array size to be twice the 
+	!value of n so that it covers all the possible values
+	integer, dimension(100)::bins
+
+	!Initiate the random number generator
+	call random_seed()
+
+	n = 50
+	iterations = 10000000
+
+	!Give the bins an initial count of 0
+	do i=0, 2*n
+		bins(i) = 0
+	enddo
+
+	!Iterate to get different Sn values
+	do i=0, iterations
+		Sn = 0.0
+		!Iterate to get the sum of x variables Sn
+		do b=0, n
+			call random_number(x)
+			!Define the x variable to be between -1 and 1
+			x = 2.0 * x - 1.0
+			Sn = Sn + x
+		enddo
+		!Depending on the value of Sn 
+		!put it in bin with position pos
+		pos = int(floor(Sn + n + 1))
+		bins(pos) = bins(pos) + 1
+	enddo
+
+	!Write the bin array into a file
+	do i=1, 2*n
+		write(2*n,*)bins(i)
+	enddo
+
+	end program
+\end{lstlisting}
+
+Code used for the uniform distribution between 0 and +1.
+\begin{lstlisting}
+	program centralLimit
+
+	!Variables definition
+	real::Sn, x
+	integer::i, b, n, iterations, pos
+	!Define bins array size to be equal to 
+	!the value of n so that it covers all the possible values
+	integer, dimension(25)::bins
+
+	!Initiate the random number generator
+	call random_seed()
+
+	n = 25
+	iterations = 10000000
+
+	!Give the bins an initial count of 0
+	do i=0, n
+		bins(i) = 0
+	enddo
+
+	!Iterate to get different Sn values
+	do i=0, iterations
+		Sn = 0.0
+		!Iterate to get the sum of x variables Sn
+		do b=0, n
+			!Obtain an x variable uniformly 
+			!distributed between 0 and 1
+			call random_number(x)
+			Sn = Sn + x
+		enddo
+		!Depending on the value of Sn 
+		!put it in bin with position pos
+		pos = int(floor(Sn + 1))
+		bins(pos) = bins(pos) + 1
+	enddo
+
+	!Write the bin array into a file
+	do i=1, n
+		write(n,*)bins(i)
+	enddo
+
+	end program
+\end{lstlisting}
+
+\end{document}
+
+
+
 Without using threads
 int Np = 2048;  //Number of particles
 int timeSteps = 1000;  //Number of timesteps
@@ -24,3 +350,6 @@ TOTAL EXECUTION TIME: 1086 seconds
 TIME PER REALISATION: 21.72 seconds
 
 Around 2.5 times faster
+
+Compilation  g++ -std=c++11 -pthread
+g++ -std=c++11 -pthread simulation.cpp -o simulation

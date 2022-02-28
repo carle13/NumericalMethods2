@@ -21,7 +21,7 @@ using namespace std;
 //Simulation parameters:
 int Np = 2048;		   //Number of particles
 int timeSteps = 1000;  //Number of timesteps
-int realisations = 50; //Number of realisations to be performed
+int realisations = 100; //Number of realisations to be performed
 int snaps = 10;		   //Number of snapshots to be saved
 bool randPos = true;   //Bool to specify if positions should be randomized
 double L = 1000;	   //Periodic box size
@@ -32,10 +32,6 @@ double ai = 0.1; //Initial scale factor
 double af = 0.5; //Final scale factor
 double si = sqrt(ai);
 double sf = sqrt(af);
-double s = si;
-double a = ai;
-double t = tofa(a, omegam0);
-double dt = 0;
 
 void realisation(int i)
 {
@@ -57,11 +53,16 @@ void realisation(int i)
 	particles syst = particles(Np, pos, vel);
 
 	//Save initial conditions
-	syst.getXbin(dataFile + "pos0.data");
+	// syst.getXbin(dataFile + "pos0.data");
 	// syst.getVbin(dataFile + "vel0.data");
 	// syst.getAbin(dataFile + "acc0.data");
 	double *spec = syst.spectrumSystem(L);
 	write_binary(dataFile + "spec0.data", 1025, spec);
+
+	double s = si;
+	double a = ai;
+	double t = tofa(a, omegam0);
+	double dt = 0;
 
 	//PERFORM THE SIMULATION STEPS
 	for (int b = 1; b <= timeSteps; b++)
@@ -78,7 +79,7 @@ void realisation(int i)
 		if (b % (timeSteps / snaps) == 0 && b != timeSteps)
 		{
 			//Save snapshot
-			syst.getXbin(dataFile + "pos" + to_string(b) + ".data");
+			// syst.getXbin(dataFile + "pos" + to_string(b) + ".data");
 			// syst.getVbin(dataFile + "vel" + to_string(b) + ".data");
 			// syst.getAbin(dataFile + "acc" + to_string(b) + ".data");
 			spec = syst.spectrumSystem(L);
@@ -87,7 +88,7 @@ void realisation(int i)
 		t = nt;
 	}
 	//Save final conditions
-	syst.getXbin(dataFile + "pos" + to_string(timeSteps) + ".data");
+	// syst.getXbin(dataFile + "pos" + to_string(timeSteps) + ".data");
 	// syst.getVbin(dataFile + "vel" + to_string(timeSteps) + ".data");
 	// syst.getAbin(dataFile + "acc" + to_string(timeSteps) + ".data");
 	spec = syst.spectrumSystem(L);
@@ -109,6 +110,48 @@ int main()
 	{
 		tr[i].join();
 	}
+
+	double s = si;
+	double a = ai;
+	double t = tofa(a, omegam0);
+	double dt = 0;
+
+	double aVals[snaps+1];
+	double dVals[snaps+1];
+	double tVals[snaps+1];
+	int snapshot = 1;
+
+	aVals[0] = a;
+	dVals[0] = dofa(a, omegam0);
+	tVals[0] = tofa(a, omegam0);
+
+	// PERFORM THE SIMULATION STEPS
+	for (int b = 1; b <= timeSteps; b++)
+	{
+		s = si + (b * ((sf - si) / timeSteps));
+		a = s * s;
+		double nt = tofa(a, omegam0);
+		dt = nt - t;
+		double c = 2 * M_PI * (1.3936388 * pow(10, -28)) * omegam0 * (2.77573 * pow(10, 11));
+		c *= L / (Np * a);
+
+		if (b % (timeSteps / snaps) == 0 && b != timeSteps)
+		{
+			// Save a, D(a), t(a)
+			aVals[snapshot] = a;
+			dVals[snapshot] = dofa(a, omegam0);
+			tVals[snapshot] = tofa(a, omegam0);
+			snapshot++;
+		}
+		t = nt;
+	}
+	aVals[snapshot] = a;
+	dVals[snapshot] = dofa(a, omegam0);
+	tVals[snapshot] = tofa(a, omegam0);
+
+	write_binary("aVals.data", snaps+1, aVals);
+	write_binary("dVals.data", snaps+1, dVals);
+	write_binary("tVals.data", snaps+1, tVals);
 
 	double t2Total = mm_systime();
 	cout << "TOTAL EXECUTION TIME: " << double(t2Total-t1Total)/1000. << " seconds" << endl;
