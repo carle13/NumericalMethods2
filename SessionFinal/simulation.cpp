@@ -23,7 +23,7 @@ int main()
 	//Simulation parameters:
 	int Np = 2048;  //Number of particles
 	int timeSteps = 1000;  //Number of timesteps
-	int realisations = 50;  //Number of realisations to be performed
+	int realisations = 1;  //Number of realisations to be performed
 	int snaps = 10;  //Number of snapshots to be saved
 	bool randPos = true;  //Bool to specify if positions should be randomized
 	double L = 1000;  //Periodic box size
