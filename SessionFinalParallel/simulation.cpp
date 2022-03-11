@@ -20,16 +20,16 @@ using namespace std;
 
 //Simulation parameters:
 int Np = 2048;		   //Number of particles
-int timeSteps = 1000;  //Number of timesteps
-int realisations = 50; //Number of realisations to be performed
-int snaps = 10;		   //Number of snapshots to be saved
+int timeSteps = 10000;  //Number of timesteps
+int realisations = 5; //Number of realisations to be performed
+int snaps = 100;		   //Number of snapshots to be saved
 bool randPos = true;   //Bool to specify if positions should be randomized
 double L = 1000;	   //Periodic box size
 double H0 = 100;	   //H0 value
-double omegam0 = 0.32; //density
+double omegam0 = 0.032; //density
 
 double ai = 0.1; //Initial scale factor
-double af = 0.5; //Final scale factor
+double af = 5.0; //Final scale factor
 double si = sqrt(ai);
 double sf = sqrt(af);
 
@@ -53,7 +53,7 @@ void realisation(int i)
 	particles syst = particles(Np, pos, vel);
 
 	//Save initial conditions
-	// syst.getXbin(dataFile + "pos0.data");
+	syst.getXbin(dataFile + "pos0.data");
 	// syst.getVbin(dataFile + "vel0.data");
 	// syst.getAbin(dataFile + "acc0.data");
 	write_binary(dataFile + "spec0.data", 1025, syst.spectrumSystem(L));
@@ -78,7 +78,7 @@ void realisation(int i)
 		if (b % (timeSteps / snaps) == 0 && b != timeSteps)
 		{
 			//Save snapshot
-			// syst.getXbin(dataFile + "pos" + to_string(b) + ".data");
+			syst.getXbin(dataFile + "pos" + to_string(b) + ".data");
 			// syst.getVbin(dataFile + "vel" + to_string(b) + ".data");
 			// syst.getAbin(dataFile + "acc" + to_string(b) + ".data");
 			write_binary(dataFile + "spec" + to_string(b) + ".data", 1025, syst.spectrumSystem(L));
@@ -86,7 +86,7 @@ void realisation(int i)
 		t = nt;
 	}
 	//Save final conditions
-	// syst.getXbin(dataFile + "pos" + to_string(timeSteps) + ".data");
+	syst.getXbin(dataFile + "pos" + to_string(timeSteps) + ".data");
 	// syst.getVbin(dataFile + "vel" + to_string(timeSteps) + ".data");
 	// syst.getAbin(dataFile + "acc" + to_string(timeSteps) + ".data");
 	write_binary(dataFile + "spec" + to_string(timeSteps) + ".data", 1025, syst.spectrumSystem(L));
