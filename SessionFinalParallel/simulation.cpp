@@ -44,8 +44,8 @@ void realisation(int i)
 		pos[b] = b * (L / Np);
 		vel[b] = 0;
 	}
-	double specTheo[2048];
-	read_binary("initial_pk_linear_theo.data", 2048, specTheo);
+	double specTheo[1025];
+	read_binary("initial_pk_linear_theo.data", 1025, specTheo);
 	if (randPos)
 	{
 		ic_generator(Np, L, H0 * eofa(ai, omegam0) * fofa(ai, omegam0), 1, specTheo, pos, vel);

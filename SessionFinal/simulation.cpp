@@ -64,8 +64,8 @@ int main()
 			pos[b] = b * (L / Np);
 			vel[b] = 0;
 		}
-		double specTheo[2048];
-		read_binary("initial_pk_linear_theo.data", 2048, specTheo);
+		double specTheo[1025];
+		read_binary("initial_pk_linear_theo.data", 1025, specTheo);
 		if(randPos)
 		{
 			ic_generator(Np, L, H0 * eofa(ai, omegam0) * fofa(ai, omegam0), 1, specTheo, pos, vel);
@@ -93,7 +93,7 @@ int main()
 			double nt = tofa(a, omegam0);
 			dt = nt - t;
 			double c = 2 * M_PI * (1.3936388 * pow(10, -28)) * omegam0 * (2.77573 * pow(10, 11));
-			c *= L / (Np * a);
+			c *= L / (Np * pow(a, 3));
 			syst.acceleration(H0*eofa(a, omegam0), c, L);
 			syst.moove(dt, L);
 
