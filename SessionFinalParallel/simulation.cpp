@@ -23,10 +23,10 @@ int Np = 2048;		   //Number of particles
 int timeSteps = 10000;  //Number of timesteps
 int realisations = 5; //Number of realisations to be performed
 int snaps = 100;		   //Number of snapshots to be saved
-bool randPos = true;   //Bool to specify if positions should be randomized
+bool randPos = false;   //Bool to specify if positions should be randomized
 double L = 1000;	   //Periodic box size
 double H0 = 100;	   //H0 value
-double omegam0 = 0.032; //density
+double omegam0 = 0.9; //density
 
 double ai = 0.1; //Initial scale factor
 double af = 5.0; //Final scale factor

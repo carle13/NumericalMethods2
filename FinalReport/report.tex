@@ -44,15 +44,33 @@
 \maketitle
 
 \section*{Introduction}
+This simulation project is concerned with analyzing the structure formation in the universe. For this purpose, the \Lambda CDM model is utilized for creating a numerical approximation of our universe.
 
-\subsection*{Central Limit Theorem}
-The normal or gaussian distribution is a continuous probability distribution with a density function defined as:
+\subsection*{\Lambda CDM model}
+The \Lambda CDM model is considered the standard model of cosmology, as it is the simplest theory that reproduces the most important results, such as \cite{ref:lambdacdm}:
+
+\begin{enumerate}
+\item the existence and structure of the CMB
+\item the large-scale structure in the distribution of galaxies
+\item the observed abundances of the lightest atoms
+\item the accelerating expansion of the universe
+\end{enumerate}
+In this model, the energy of the universe is divided in three components: dark energy, cold dark matter, and ordinary matter.
+
+To account for the scale of the universe, a dimensionless factor is used $a$. This factor is used together with the comoving position $\vec{x}$ to find the physical position $\vec{r}$, related by $\vec{r} = a \vec{x}$. Using the comoving position, two points will always have the same distance between them at any moment in time. The equations of motion can then be solved by taking derivatives of the physical position $\vec{r}$.
+
+Then, using Poisson's equation for gravity, we can relate the gravitational potential to the matter distribution.
 
 \begin{equation}
-	f(x) = \frac{1}{\sigma \sqrt{2 \pi}} \exp \left( -\frac{1}{2} {\left( \frac{x - \mu}{\sigma}\right)}^{2}\right)
+\Lambda_{r} \phi = 4 \pi G \rho_{m}
 \end{equation}
 
-Where \(\mu\) is the mean and \(\sigma\) is the standard deviation\cite{ref:normalWiki}. The curve described by the previos equation is shown in fig~\ref{ref:normalCurve}.
+By also considering General Relativity, one can extend the energy distribution to consider other components of the universe. For this project, dark matter is ignored, ordinary matter has no pressure, and dark energy has a negative pressure (accounting for the accelerating expansion rate of the universe).
+
+\begin{equation}
+\Lambda_{r} \phi = 4 \pi G \sum_{i} \rho_{i} (1 + 3w_{i}) = 4 \pi G \lcurl \rho_{m} - 2 \rho_{\Lambda} \rcurl
+\end{equation}
+
 
 \begin{figure}[H]
 	\centering
@@ -61,36 +79,14 @@ Where \(\mu\) is the mean and \(\sigma\) is the standard deviation\cite{ref:norm
 	\label{ref:normalCurve}
 \end{figure}
 
-More formally, the central limit theorem can be stated as:
+\subsection*{Power Spectrum}
 
-\begin{theorem}
-	Let \(x_{1}, x_{2}, \cdots, x_{n}\) be independent random variables having the same probability distribution, with an average \(\mu\) and standard deviation \(\sigma\). Let us consider the sum \(S_{n} = x_{1} + x_{2} + \cdots + x_{n}\). For large values of n, the distribution of \(S_{n}\) tends towards a gaussian distribution with an average \(n \mu\) and standard deviation \(\sigma n^{1/2}\).
-\end{theorem}
-
-\subsection*{Uniform Random Distribution}
-In this project, the random variables used to test the Central Limit Theorem were uniformly distributed. The uniform distribution is a continuous probability distribution in which the events are equally likely to occur. A visual representation of this can be seen on fig~\ref{ref:uniformCurve}.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\linewidth]{uniformDistribution.png}
-	\caption{Uniform probability density function\cite{ref:uniformWiki}.}
-	\label{ref:uniformCurve}
-\end{figure}
-
-The uniform density function is defined between the values of $a$ and $b$, and has the same value inside this range. The mean and standard deviation of this distribution are defined as\cite{ref:uniformStats}:
-
-\begin{equation}
-	\mu = \frac{a + b}{2}
-	\label{eq:mean}
-\end{equation}
-\begin{equation}
-	\sigma = \sqrt{\frac{{\left( b - a \right)}^{2}}{12}}
-	\label{eq:standard}
-\end{equation}
 
 
 \section*{Problem and modelling}
-In this project we are concerned with performing a numerical check of the Central Limit Theorem. In order to do this we can consider $n$ random variables. It needs to be proven that the sum of these random variables approaches the normal distribution, with the characteristics described by the Central Limit Theorem. This problem can be modelled by obtaining independent random numbers from a computer and adding them up. After doing this many times a distribution of the results of the sums can be obtained.
+This project will study the structure formation in this universe. This will be done through an N-body simulation. An $N_{p}$ number of particles are placed inside a periodic box of size $L$. These particles can represent galaxies or other structures in the universe, and by numerically solving for their positions, it is possible to study how structures are formed.
+
+In order to have a structure formation similar to the one in our universe, we need to have the right initial conditions. For this, we can use the power spectrum. The theoretical power spectrum can be used as a reference. If we set the particles such that they are equidistant from each other, we can then add small random displacements such that the power spectrum matches the theoretical power spectrum.
 
 
 \section*{Approach and numerical methods used}
@@ -152,72 +148,36 @@ The Fortran code proceded as follows:
 
 
 \section*{Analysis of the numerical results}
-The program was executed for three different values of $n$. First, it was executed for $n = 10$. The data obtained was then plotted in a histogram using matplotlib, shown in fig~\ref{ref:histo10}. From this, it can be clearly seen that the distribution of the values of $S_{n}$ follows a normal distribution.
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\linewidth]{hist10.png}
-	\caption{Histogram of the normalized distribution for $n = 10$.}
-	\label{ref:histo10}
-\end{figure}
+\subsection*{Growth of the linear part of the power spectrum}
+To confirm that the power spectrum grows proportionally with the square of the growth factor, as implied by:
 
-The distribution of $S_{n}$ could then be further compared to a normal distribution by plotting it together with a gaussian curve with mean and standard deviation as described by the Central Limit Theorem, shown in fig~\ref{ref:fit10}. The mean and standard deviation can be obtained from the mean and standard deviation from the distribution of the original random variable. This can be calculated for a uniform distribution using equations~\ref{eq:mean} and~\ref{eq:standard}. The gaussian curve has then to be multiplied by a normalization factor of 10000000 coming from the number of iterations of the Monte Carlo method. It can be seen from the graph, that the histogram closely resembles the shape of the gaussian curve, confirming the Central Limit Theorem.
+\begin{equation}
+P(k) = \frac{ D(a)^{2}}{ D(a_{i})^{2}} P_{i}(k)
+\end{equation}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\linewidth]{fit10.png}
-	\caption{Histogram of the normalized distribution for $n = 10$ and Gaussian curve.}
-	\label{ref:fit10}
-\end{figure}
-
-The program was then executed for values of $n = 5, 50$. The resulting histograms are shown in fig~\ref{fig:histograms}, where it can be seen that both cases also resemble a normal distribution. The gaussian curves that correspond to these distributions can be seen in fig~\ref{fig:fits}. As stated in the Central Limit Theorem, it can be seen that the distribution in fig~\ref{fig:fit50} matches more closely its corresponding gaussian curve, and fig~\ref{fig:fit5} has a worse match, as its $n$ value is lower. Hence, it is proven that higher values of $n$ more closely match the expected normal distribution.
+This was done by performing a simulation of 50 realizations, with 11 saved snapshots, and an $\Omega_{m,0}$ value of 0.32. After averaging over the realizations, the power spectrum was plotted, as shown in fig~\ref{fig:spectrum05}. On the left, the calculated power spectrum from the simulation is seen. The initial and final power spectrum are shown in blue and red, and the snapshots in between are shown in green, with an increasing opacity over time. On the right, the initial theoretical spectrum can be seen, as well as the intermediate spectrums for the different values of the growth factor $D(a)$, and the final spectrum in red again. The plot of the initial and final spectrums from the simulation are overlayed to show indeed that they agree on the linear part, i.e., at the lower frequencies.
 
 \begin{figure}[htp]
 	\centering
 	\begin{subfigure}[b]{0.9\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{hist5.png}
+		\includegraphics[width=\textwidth]{Graphs/measured05.png}
 		\caption{}
-		\label{fig:histo5}
+		\label{fig:measured05}
 	\end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{0.9\textwidth}
 		\centering
-		\includegraphics[width=\textwidth]{hist50.png}
+		\includegraphics[width=\textwidth]{Graphs/theoretical05.png}
 		\caption{}
-		\label{fig:histo50}
+		\label{fig:theoretical05}
 	\end{subfigure}
-	\caption{Histograms for values of $n = 5, 50$.}
-	\label{fig:histograms}
+	\caption{Measured and theoretical power spectrums}
+	\label{fig:spectrum05}
 \end{figure}
 
-\begin{figure}[htp]
-	\centering
-	\begin{subfigure}[b]{0.8\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{fit5.png}
-		\caption{}
-		\label{fig:fit5}
-	\end{subfigure}
-	\hfill
-	\begin{subfigure}[b]{0.8\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{fit50.png}
-		\caption{}
-		\label{fig:fit50}
-	\end{subfigure}
-	\caption{Histograms for values of $n = 5, 50$ and gaussian curves.}
-	\label{fig:fits}
-\end{figure}
 
-The program was then executed for a different distribution of the original random variable (Fortran code in the appendix). This time, a uniform distribution between 0 and +1 was used, which according to equation~\ref{eq:mean} would result on a non-zero average equals to 0.5. The $n$ value was set to 25. According to the Central Limit Theorem the mean of the corresponding gaussian curve would be $n \mu$, in this case equals to 12.5. As expected, the distribution of $S_{n}$ is no longer centered at zero, like in the previous cases. Now the distribution matches a gaussian curve with average of 12.5 as shown in fig~\ref{ref:fit25}.
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\linewidth]{fit25.png}
-	\caption{Histogram of the normalized distribution between 0 and +1 for $n = 25$ and Gaussian curve.}
-	\label{ref:fit25}
-\end{figure}
 
 
 \section*{Conclusion}
@@ -228,7 +188,8 @@ In this project it was shown that the Central Limit Theorem can be checked using
 \printbibliography[heading=none]
 
 \section*{Appendix}
-Code used for the uniform distribution between -1 and +1.
+\subsection*{Multithreading}
+As many types of N-body simulations, the code written for this project could highly benefit from properly utilizing a CPU with multiple cores. In order to implement multithreading, the "threading" class in C++ was used.
 \begin{lstlisting}
 	program centralLimit
 
